@@ -1,6 +1,7 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include "Vec3.h"
 #include "hittable.h"
 #include "material.h"
 #include <memory>
@@ -10,7 +11,10 @@ public:
   sphere() {};
   sphere(point3 c, double rad) : center(c), radius(rad) {}
   sphere(point3 c, double rad, std::shared_ptr<material> m)
-      : center(c), radius(rad), mat(m) {}
+      : center(c), radius(rad), mat(m) {
+    vec3 rvec = vec3(radius, radius, radius);
+    bbox = aabb(center - rvec, center + rvec);
+  }
 
   bool hit(const Ray &r, interval ray_t, hit_record &rec) const override {
     vec3 oc = center - r.origin();
@@ -40,9 +44,12 @@ public:
     return true;
   }
 
+  aabb bounding_box() const override { return bbox; }
+
 private:
   point3 center;
   double radius;
   std::shared_ptr<material> mat;
+  aabb bbox;
 };
 #endif // !SPHERE_H

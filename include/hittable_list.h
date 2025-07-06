@@ -10,7 +10,10 @@ public:
   std::vector<shared_ptr<hittable>> objects;
 
   hittable_list() {}
-  hittable_list(shared_ptr<hittable> object) { add(object); }
+  hittable_list(shared_ptr<hittable> object) {
+    add(object);
+    bbox = aabb(bbox, object->bounding_box());
+  }
 
   void clear() { objects.clear(); }
 
@@ -31,6 +34,11 @@ public:
 
     return hit_anything;
   }
+
+  aabb bounding_box() const override { return bbox; }
+
+private:
+  aabb bbox;
 };
 
 #endif

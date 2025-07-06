@@ -4,11 +4,15 @@
 #include "hittable.h"
 #include "material.h"
 #include <cmath>
+#include <cstdint>
+#include <thread>
+#include <vector>
 
 class camera {
 public:
   double aspect_ratio = 16.0f / 9.0f;
   int image_width = 800;
+  int image_height; // Rendered image height
   int maxDepth = 10;
   int sample_per_pixel = 10;
   double vfov = 45.0;
@@ -17,13 +21,13 @@ public:
   vec3 vup = vec3(0, 1, 0);
 
 private:
-  int image_height;   // Rendered image height
   point3 center;      // Camera center
   point3 pixel00_loc; // Location of pixel 0, 0
   vec3 pixel_delta_u; // Offset to pixel to the right
   vec3 pixel_delta_v; // Offset to pixel below
   double sample_scale_per_pixel;
   vec3 u, v, w;
+  std::vector<color> frame_buffer;
 
 public:
   void render(const hittable &world) {
@@ -47,10 +51,58 @@ public:
     std::clog << "\rDone.                 \n";
   }
 
+  void render_thread(hittable &world) {
+    initialize();
+
+    int num_threads = std::thread::hardware_concurrency();
+    if (num_threads == 0)
+      num_threads = 4;
+
+    int rows_per_thread = image_height / num_threads;
+
+    auto worker = [&](int start_row, int end_row) {
+      for (int j = end_row - 1; j >= start_row; --j) {
+        for (int i = 0; i < image_width; ++i) {
+          color pixel_color(0, 0, 0);
+          for (int s = 0; s < sample_per_pixel; ++s) {
+            Ray r = get_ray(i, j);
+            pixel_color += ray_color(r, maxDepth, world);
+          }
+          frame_buffer[j * image_width + i] = pixel_color;
+        }
+      }
+    };
+
+    std::vector<std::thread> threads;
+    for (int t = 0; t < num_threads; ++t) {
+      int start = t * rows_per_thread;
+      int end = (t == num_threads - 1) ? image_height : start + rows_per_thread;
+      threads.emplace_back(worker, start, end);
+    }
+
+    for (auto &t : threads)
+      t.join();
+
+    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
+    for (int j = 0; j < image_height; j++) {
+      std::clog << "\rScanlines remaining: " << (image_height - j) << ' '
+                << std::flush;
+      for (int i = 0; i < image_width; i++) {
+        write_color(std::cout,
+                    frame_buffer[j * image_width + i] * sample_scale_per_pixel);
+      }
+    }
+
+    std::clog << "\rDone.                 \n";
+  }
+
 private:
   void initialize() {
     image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
+
+    frame_buffer.resize(image_width * image_height);
 
     center = lookfrom;
     sample_scale_per_pixel = 1.0 / sample_per_pixel;
