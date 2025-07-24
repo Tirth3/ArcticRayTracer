@@ -1,3 +1,6 @@
-An experimental repo for making a ray tracer engine using the book "Ray Tracing in one weekend" as reference 
+A ray tracer engine made using the book "Ray Tracing in one weekend" as reference 
 
-which I will port to SDL2 for realtime ray tracing using GPU and shaders
+# TODO 
+1. Make it using SDL2
+2. Add GPU computing
+3. Make it FAST
