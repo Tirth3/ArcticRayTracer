@@ -1,8 +1,49 @@
-A ray tracer engine made using the book "Ray Tracing in one weekend" as reference 
+# C++ Ray Tracing Engine
 
-The experimental branch is used to add new features and bug fixes which will be merged with the main brach when the testing and development is done up to the point.
+A simple ray tracing engine written in C++, based on [*Ray Tracing in One Weekend*](https://raytracing.github.io/books/RayTracingInOneWeekend.html) by Peter Shirley. This version includes **multithreading** for faster rendering.
 
-# TODO 
-1. Make it using SDL2
-2. Add GPU computing
-3. Make it FAST
+---
+
+## Features
+
+- Core ray tracing functionality:
+  - Spheres, materials, and reflections
+  - Lambertian, Metal, and Dielectric materials
+  - Camera system with depth of field
+- Outputs images in `.ppm` format
+- **Multithreaded rendering** for improved performance
+- Configurable scene setup
+
+---
+
+## Requirements
+
+- C++17 or higher  
+- Modern C++ compiler (g++, clang++, MSVC)
+
+---
+
+## Build Instructions
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/raytracing-engine.git
+cd raytracing-engine
+
+# make a build directory
+mkdir build
+# compile the project
+cmake ..
+make all
+# run the executable
+./RayTracer
+```
+## Preview
+<img width="1920" height="1080" alt="canvas" src="https://github.com/user-attachments/assets/2e036a93-3252-42a4-9f4c-e162be630b2e" />
+
+## Roadmap / Future Improvements
+-- Additional geometry types (planes, triangles, meshes)
+-- Textures and Perlin noise
+-- BVH acceleration structures for faster rendering
+-- GUI-based viewer for live previews
+
